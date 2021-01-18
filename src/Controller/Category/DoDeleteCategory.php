@@ -9,8 +9,7 @@ use App\Repository\CategoryRepository;
 use Doctrine\ORM\EntityNotFoundException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Nelmio\ApiDocBundle\Annotation\Model;
-use Nelmio\ApiDocBundle\Annotation\Security;
+use InvalidArgumentException;
 use OpenApi\Annotations as OA;
 
 
@@ -30,29 +29,34 @@ class DoDeleteCategory
      * @Route("/api/category/delete", methods={"DELETE"})
      * @throws EntityNotFoundException
      *
-     * List the rewards of the specified user.
-     *
-     * This call takes into account all confirmed awards, but not pending or refused awards.
      * @OA\Response(
      *     response=200,
-     *     description="Returns the rewards of an user",
-     *     @OA\JsonContent(
-     *        type="array",
-     *        @OA\Items(ref=@Model(type=Reward::class, groups={"full"}))
-     *     )
+     *     description="Delete category by uuid",
+     * )
+     * @OA\Response(
+     *     response=400,
+     *     description="Invalid argument",
+     * )
+     * @OA\Response(
+     *     response=404,
+     *     description="Entity not found",
      * )
      * @OA\Parameter(
-     *     name="order",
+     *     name="categoryUuid",
      *     in="query",
-     *     description="The field used to order rewards",
+     *     required=true,
+     *     description="The field used to serch category",
      *     @OA\Schema(type="string")
      * )
-     * @OA\Tag(name="rewards")
+     * @OA\Tag(name="category")
      */
 
     public function __invoke(Request $request)
     {
         $categoryUuid = $request->get('categoryUuid');
+        if (!$categoryUuid) {
+            throw new InvalidArgumentException('categoryUuid is required');
+        }
         /** @var  $category Category */
         $category = $this->categoryRepository->findOneBy(['uuid' => $categoryUuid]);
 
